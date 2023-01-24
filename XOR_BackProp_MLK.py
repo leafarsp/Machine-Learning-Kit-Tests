@@ -28,6 +28,7 @@ def main():
         shuffle = True,
         random_state = 1,
         n_individuals = 10
+
     )
     print(X[0])
     a.initialize_layers(2, 2)
@@ -36,7 +37,6 @@ def main():
     learning_rate_end = 0.01
     alpha = [0.1, 0.1]
     try:
-
         for i in range(0,4):
             a.forward_propagation(X[i])
             print(f'Saída antes do back propagation{a.l[1].y}')
