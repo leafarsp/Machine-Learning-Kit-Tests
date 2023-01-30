@@ -32,15 +32,21 @@ def main():
         n_individuals = 10,
         weight_limit=1,
         batch_size='auto',
-        tol=0.01
+        tol=0.00001,
+        n_iter_no_change=10
     )
 
     Eav, ne = clf.fit(X,y)
-    mlk.teste_acertividade(X, y, clf, print_result=True)
+    print(f'Testando acertividade:')
+    mlk.teste_acertividade(X, y, clf,
+                           print_result=False,
+                           save_result=True,
+                           filename='XOR_results.xlsx')
     print(f'Épocas necessárias: {ne}')
-    plt.plot(Eav[0:(ne*n_inst)])
+    plt.plot(Eav[0:(ne)])
     plt.show()
     plt_retas(clf, X, y)
+    print(f'Acertividade:{clf.get_acertividade()}%')
     # print(a.get_output_class())
     # a.save_neural_network('teste.xlsx')
 
