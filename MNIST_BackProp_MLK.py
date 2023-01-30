@@ -39,9 +39,15 @@ def main():
     # print(np.shape(y))
 
 
-    clf = mlk.load_neural_network(f'MNIST_BackProp 2023-1-30 8-54-17.xlsx')
+    clf = mlk.load_neural_network(
+        f'MNIST_BackProp 2023-1-30 15-14-54.xlsx')
 
-    clf.max_iter=200
+    clf.max_iter = 20
+    clf.tol = 1e-6
+    clf.n_iter_no_change = 3
+    clf.learning_rate_init = 9e-1
+    clf.momentum=clf.learning_rate_init
+    learning_rate = 'constant' #'invscaling'
     # clf = mlk.MLPClassifier(
     #     hidden_layer_sizes=((15)),
     #     activation=mlk.activation_function_name.TANH,
@@ -60,9 +66,14 @@ def main():
 
     Eav, ne = clf.fit(X, y)
     print(f'Testando acertividade:')
+    time = datetime.datetime.now()
+    filename = f'MNIST_results ' \
+               f'{time.year}-{time.month} - {time.day} ' \
+               f'{time.hour}-{time.minute}-{time.second}.xlsx'
+
     mlk.teste_acertividade(X, y, clf, print_result=False,
                            save_result = True,
-                           filename='MNIST_results.xlsx')
+                           filename=filename)
     print(f'Épocas necessárias: {ne}')
     print(f'Acertividade:{clf.get_acertividade():.2f}%')
     plt.plot(Eav[0:(ne * n_inst)])

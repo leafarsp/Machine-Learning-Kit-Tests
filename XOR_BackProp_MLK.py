@@ -25,9 +25,9 @@ def main():
         learning_rate = 'invscaling', # 'constant'
         solver = mlk.solver.BACKPROPAGATION,
         learning_rate_init = 0.5, # 0.001 para constant
-        max_iter = 30000,
-        shuffle = True,
-        random_state = 1,
+        max_iter=30000,
+        shuffle=True,
+        random_state=1,
         momentum=0.9, # 0.01 para constant
         n_individuals = 10,
         weight_limit=1,
