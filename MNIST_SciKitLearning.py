@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # import classe_rede_neural as nnc
 import numpy as np
+import MachineLearningKit as mlk
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
     # dataset = pd.read_csv('mnist_test.csv')
     print(f'Loading dataset')
     dataset = pd.read_csv('mnist_train_small.csv')
-    n_inst =  500
+    n_inst =  len(dataset.index)#500
 
     # Filtrando apenas o número 1
     # dataset = dataset.loc[dataset['7'] == 1]
@@ -25,7 +26,7 @@ def main():
     dataset = dataset.iloc[0:n_inst]
 
     dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
-    dataset.iloc[:, 1:] = dataset.iloc[:, 1:] * 2. - 1.
+    #dataset.iloc[:, 1:] = dataset.iloc[:, 1:] * 2. - 1.
 
     print(f'Loading and adapting test dataset')
     test_dataset = pd.read_csv('mnist_test.csv')
@@ -47,38 +48,47 @@ def main():
 
 
     clf = MLPClassifier(
-        hidden_layer_sizes=((50,)),
+        hidden_layer_sizes=((15,)),
         activation='tanh',
-        learning_rate='invscaling',  # 'constant'
+        learning_rate='constant',#'adaptive' ,#'invscaling',  # 'constant'
         solver='sgd',
         learning_rate_init=0.5,  # 0.001 para constant
-        max_iter=3000,
+        max_iter=1000,
         shuffle=True,
         random_state=1,
         momentum=0.9,  # 0.01 para constant
 
-        # batch_size='auto',
+        batch_size= 'auto',
         tol=1e-8,
         verbose=True,
         n_iter_no_change=10
     )
     clf.fit(X, y)
     print(f'Testando acertividade:')
-    acert = teste_acertividade(X, y, clf, print_result=False)
+    clf_mlk = mlk.load_scikit_model(clf)
+    acert = mlk.teste_acertividade(X,y,clf_mlk,
+                                   save_result=True,
+                                   filename=f'MNIST '
+                                            f'scikitlearn '
+                                            f'results.xlsx')
+    # acert = teste_acertividade(X, y, clf, print_result=False)
 
 
-    print(clf.coefs_)
+    # print(np.shape(clf.coefs_))
 
-    print(clf.hidden_layer_sizes)
+    # print(clf.hidden_layer_sizes)
 
-    print(clf.get_params())
+    # print(clf.get_params())
 
-    for i in range(0, len(clf.coefs_)):
-        print(f'\n Layer {i}')
-        print(np.transpose(clf.coefs_[i]))
-        print(f'Bias:{clf.intercepts_[i]}')
+    # for i in range(0, len(clf.coefs_)):
+    #     print(f'\n Layer {i}')
+    #     print(np.shape(np.transpose(clf.coefs_[i])))
+    #     print(f'Bias:{np.shape(clf.intercepts_[i])}')
 
     print(f'Acertividade: {acert}%')
+
+    clf_mlk.save_neural_network(f'MNIST Scikit learn '
+                                f'model converted.xlsx')
     # print(f'Predicted_number: {get_output_class(a)}')
     # print(f'Real number:{get_output_class(y[i])}')
     # a1 = nnc.load_scikit_model(clf)

@@ -25,7 +25,7 @@ def main():
     test_dataset = pd.read_csv('mnist_test.csv')
     test_dataset = test_dataset.iloc[0:n_inst]
     test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
-    test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] * 2. - 1.
+    #test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] * 2. - 1.
 
     X = dataset.iloc[:, 1:].to_numpy()
 
@@ -40,12 +40,12 @@ def main():
 
 
     clf = mlk.load_neural_network(
-        f'MNIST_BackProp 2023-1-30 15-14-54.xlsx')
+        f'MNIST_BackProp last.xlsx')
 
-    clf.max_iter = 20
+    clf.max_iter = 200
     clf.tol = 1e-6
     clf.n_iter_no_change = 3
-    clf.learning_rate_init = 9e-1
+    clf.learning_rate_init = 5e-1
     clf.momentum=clf.learning_rate_init
     learning_rate = 'constant' #'invscaling'
     # clf = mlk.MLPClassifier(
@@ -82,6 +82,7 @@ def main():
     clf.save_neural_network(f'MNIST_BackProp {time.year}-{time.month}'
                             f'-{time.day} {time.hour}-{time.minute}'
                             f'-{time.second}.xlsx')
+    clf.save_neural_network(f'MNIST_BackProp last.xlsx')
 
 if __name__ == '__main__':
     main()
