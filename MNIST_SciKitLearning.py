@@ -17,7 +17,7 @@ def main():
     # dataset = pd.read_csv('mnist_test.csv')
     print(f'Loading dataset')
     dataset = pd.read_csv('mnist_train_small.csv')
-    n_inst =  len(dataset.index)#500
+    n_inst = len(dataset.index)#500
 
     # Filtrando apenas o número 1
     # dataset = dataset.loc[dataset['7'] == 1]
@@ -42,15 +42,15 @@ def main():
     y=[[0]*n_class]*n_inst
 
     for i in range(0,n_inst):
-        y[i] = list(output_layer_activation(output_value=dataset.iloc[i,0],num_classes=n_class))
-
-
+        y[i] = list(output_layer_activation(
+            output_value=dataset.iloc[i,0],
+            num_classes=n_class,lower_value=0.))
 
 
     clf = MLPClassifier(
         hidden_layer_sizes=((15,)),
         activation='tanh',
-        learning_rate='constant',#'adaptive' ,#'invscaling',  # 'constant'
+        learning_rate='invscaling',#'adaptive' ,#'invscaling',  # 'constant'
         solver='sgd',
         learning_rate_init=0.5,  # 0.001 para constant
         max_iter=1000,
@@ -61,7 +61,8 @@ def main():
         batch_size= 'auto',
         tol=1e-8,
         verbose=True,
-        n_iter_no_change=10
+        n_iter_no_change=10,
+        alpha = 1e-5,
     )
     clf.fit(X, y)
     print(f'Testando acertividade:')
@@ -72,8 +73,7 @@ def main():
                                             f'scikitlearn '
                                             f'results.xlsx')
     # acert = teste_acertividade(X, y, clf, print_result=False)
-
-
+    #
     # print(np.shape(clf.coefs_))
 
     # print(clf.hidden_layer_sizes)
@@ -97,8 +97,9 @@ def main():
     # nnc.teste_neural_network(dataset, a1)
     # acertividade = nnc.teste_acertividade(dataset, n_class, a1, True)
     # print(f'Acertividade:{acertividade}')
-def output_layer_activation(output_value, num_classes):
-    d = np.ones(num_classes, dtype=np.float64) * -1.
+def output_layer_activation(output_value, num_classes,
+                            lower_value=-1.):
+    d = np.ones(num_classes, dtype=np.float64) * lower_value
     # num = dataset_shufle.iloc[ni, 0]
     d[output_value] = 1.
     return d
