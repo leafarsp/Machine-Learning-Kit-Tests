@@ -3,30 +3,56 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn.neural_network as mlk
+import pickle
+import datetime
 
 def main():
-    high_lim = 1.
-    low_lim = 0.
-    data = {'y1': [high_lim, low_lim, low_lim, high_lim],
-            'y2': [low_lim, high_lim, high_lim, low_lim],
-            'x1': [low_lim, low_lim,high_lim, high_lim],
-            'x2': [low_lim, high_lim, low_lim, high_lim]}
-    dataset = pd.DataFrame(data=data)
-    n_inst = len(dataset.index)
+    print_event_time('Start time')
 
-    X = dataset.loc[:, ['x1', 'x2']].to_numpy()
-    y = dataset.loc[:, ['y1', 'y2']].to_numpy()
+    X, y, n_inst = prepare_dataset()
+    # clf = create_new_classifier()
 
-    dataset.drop(columns=['y1'], inplace=True)
-    print(dataset)
+    clf = load_nn_obj('clf_scikit_XOR.nn')
+    clf.warm_start=True
 
+    clf.fit(X,y)
+
+    test_accuracy(X, y, clf)
+
+
+    # for i in range(0, len(clf.coefs_)):
+    #     print(f'\n Layer {i}')
+    #     print(f'Weights: {np.transpose(clf.coefs_[i])}')
+    #     print(f'Bias:{clf.intercepts_[i]}')
+
+
+    plt_retas(clf,X,y)
+
+    save_nn_obj(clf, 'clf_scikit_XOR.nn')
+
+    # print(a.get_output_class())
+    # a.save_neural_network('teste.xlsx')
+def save_nn_obj(obj, filename):
+    with open(filename, 'wb') as outp:
+        # Step 3
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+def load_nn_obj(filename):
+    with open(filename, 'rb') as inp:
+        clf = pickle.load(inp)
+    return clf
+def test_accuracy(X_t, y_t, clf):
+    print(f'Testando acertividade:')
+    acert = teste_acertividade(X_t, y_t, clf, print_result=True)
+    print(f'Acertividade: {acert}%')
+
+def create_new_classifier():
     clf= mlk.MLPClassifier(
         hidden_layer_sizes=((2)),
         activation= 'tanh',
         learning_rate = 'invscaling', # 'constant'
         solver = 'sgd',
         learning_rate_init = 0.5, # 0.001 para constant
-        max_iter = 30000,
+        max_iter = 30,
         shuffle = True,
         random_state = 1,
         momentum=0.9, # 0.01 para constant
@@ -36,22 +62,34 @@ def main():
         verbose = True,
         n_iter_no_change=10
     )
+    return clf
+def prepare_dataset():
+    high_lim = 1.
+    low_lim = 0.
+    data = {'y1': [high_lim, low_lim, low_lim, high_lim],
+            'y2': [low_lim, high_lim, high_lim, low_lim],
+            'x1': [low_lim, low_lim, high_lim, high_lim],
+            'x2': [low_lim, high_lim, low_lim, high_lim]}
+    dataset = pd.DataFrame(data=data)
+    n_inst = len(dataset.index)
 
-    clf.fit(X,y)
-
-    acert = teste_acertividade(X, y, clf, print_result=True)
-    print(f'Acertividade: {acert}%')
-    # for i in range(0, len(clf.coefs_)):
-    #     print(f'\n Layer {i}')
-    #     print(f'Weights: {np.transpose(clf.coefs_[i])}')
-    #     print(f'Bias:{clf.intercepts_[i]}')
-
-
-    plt_retas(clf,X,y)
-
-    # print(a.get_output_class())
-    # a.save_neural_network('teste.xlsx')
-
+    X = dataset.loc[:, ['x1', 'x2']].to_numpy()
+    y = dataset.loc[:, ['y1', 'y2']].to_numpy()
+    dataset.drop(columns=['y1'], inplace=True)
+    print(dataset)
+    return X,y,n_inst
+def print_event_time(str_event):
+    t = datetime.datetime.now()
+    print(f'{str_event} {t.year:04d}-{t.month:02d}-{t.day:02d} - '
+          f'{t.hour:02d}:{t.minute:02d}:{t.second:02d}')
+def save_nn_obj(obj, filename):
+    with open(filename, 'wb') as outp:
+        # Step 3
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+def load_nn_obj(filename):
+    with open(filename, 'rb') as inp:
+        clf = pickle.load(inp)
+    return clf
 def plt_retas(rede,X, y):
     # Realiza construção do gráfico 2D das entradas e as retas
     num_inst = np.shape(X)[0]

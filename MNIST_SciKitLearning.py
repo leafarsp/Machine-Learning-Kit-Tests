@@ -4,99 +4,68 @@ import matplotlib.pyplot as plt
 # import classe_rede_neural as nnc
 import numpy as np
 import MachineLearningKit as mlk
+import datetime
+import pickle
 
 
 def main():
-    # a1 = nnc.load_neural_network('MNISTS_BackProp.xlsx')
-    # clf = a1.convert_model_to_SciKitLearning()
+    print_event_time('Start time')
 
+    X, y, n_inst = prepare_dataset()
 
-    n_class=10
-    # Base de dados de treinamento
-    # Se for utilizar o Jupyter notebook, utilizar a linha abaixo
-    # dataset = pd.read_csv('mnist_test.csv')
-    print(f'Loading dataset')
-    dataset = pd.read_csv('mnist_train_small.csv')
-    n_inst = len(dataset.index)#500
+    clf = create_new_classifier()
 
-    # Filtrando apenas o número 1
-    # dataset = dataset.loc[dataset['7'] == 1]
-    # dataset = dataset[dataset['6'].isin([1,4])]
-    print(f'Adapting dataset')
-    dataset = dataset.iloc[0:n_inst]
-
-    dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
-    #dataset.iloc[:, 1:] = dataset.iloc[:, 1:] * 2. - 1.
-
-    print(f'Loading and adapting test dataset')
-    test_dataset = pd.read_csv('mnist_test.csv')
-    test_dataset = test_dataset.iloc[0:n_inst]
-    test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
-    # test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] * 2. - 1.
-
-    X = dataset.iloc[:,1:].to_numpy()
-
-
-    # print(np.shape(X))
-
-    y=[[0]*n_class]*n_inst
-
-    for i in range(0,n_inst):
-        y[i] = list(output_layer_activation(
-            output_value=dataset.iloc[i,0],
-            num_classes=n_class,lower_value=0.))
-
-
-    clf = MLPClassifier(
-        hidden_layer_sizes=((15,)),
-        activation='tanh',
-        learning_rate='invscaling',#'adaptive' ,#'invscaling',  # 'constant'
-        solver='sgd',
-        learning_rate_init=0.5,  # 0.001 para constant
-        max_iter=1000,
-        shuffle=True,
-        random_state=1,
-        momentum=0.9,  # 0.01 para constant
-
-        batch_size= 'auto',
-        tol=1e-8,
-        verbose=True,
-        n_iter_no_change=10,
-        alpha = 1e-5,
-    )
     clf.fit(X, y)
-    print(f'Testando acertividade:')
+
+    X_t, y_t, n_inst_t = prepare_test_dataset()
     clf_mlk = mlk.load_scikit_model(clf)
-    acert = mlk.teste_acertividade(X,y,clf_mlk,
+    test_accuracy(X_t, y_t, clf)
+
+    clf_mlk.save_neural_network(f'MNIST Scikit learn '
+                                f'model converted.xlsx')
+    save_nn_obj(clf, 'MNIST_BackProp_Scikit.nn')
+
+    print_event_time('End time')
+def test_accuracy(X_t, y_t, clf):
+    print(f'Testando acertividade:')
+
+    acert = mlk.teste_acertividade(X_t, y_t, clf_mlk,
                                    save_result=True,
                                    filename=f'MNIST '
                                             f'scikitlearn '
                                             f'results.xlsx')
-    # acert = teste_acertividade(X, y, clf, print_result=False)
-    #
-    # print(np.shape(clf.coefs_))
-
-    # print(clf.hidden_layer_sizes)
-
-    # print(clf.get_params())
-
-    # for i in range(0, len(clf.coefs_)):
-    #     print(f'\n Layer {i}')
-    #     print(np.shape(np.transpose(clf.coefs_[i])))
-    #     print(f'Bias:{np.shape(clf.intercepts_[i])}')
-
     print(f'Acertividade: {acert}%')
+def create_new_classifier():
+    clf = MLPClassifier(
+        hidden_layer_sizes=((15,)),
+        activation='tanh',
+        learning_rate='invscaling',  # 'adaptive' ,#'invscaling',  # 'constant'
+        solver='sgd',
+        learning_rate_init=0.5,  # 0.001 para constant
+        max_iter=200000,
+        shuffle=True,
+        random_state=1,
+        momentum=0.5,  # 0.01 para constant
 
-    clf_mlk.save_neural_network(f'MNIST Scikit learn '
-                                f'model converted.xlsx')
-    # print(f'Predicted_number: {get_output_class(a)}')
-    # print(f'Real number:{get_output_class(y[i])}')
-    # a1 = nnc.load_scikit_model(clf)
-    # a1.save_neural_network('teste_MNIST_scikit_learn.xlsx')
-
-    # nnc.teste_neural_network(dataset, a1)
-    # acertividade = nnc.teste_acertividade(dataset, n_class, a1, True)
-    # print(f'Acertividade:{acertividade}')
+        batch_size='auto',
+        tol=1e-8,
+        verbose=True,
+        n_iter_no_change=10,
+        alpha=1e-5,
+    )
+    return clf
+def print_event_time(str_event):
+    t = datetime.datetime.now()
+    print(f'{str_event} {t.year:04d}-{t.month:02d}-{t.day:02d} - '
+          f'{t.hour:02d}:{t.minute:02d}:{t.second:02d}')
+def save_nn_obj(obj, filename):
+    with open(filename, 'wb') as outp:
+        # Step 3
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+def load_nn_obj(filename):
+    with open(filename, 'rb') as inp:
+        clf = pickle.load(inp)
+    return clf
 def output_layer_activation(output_value, num_classes,
                             lower_value=-1.):
     d = np.ones(num_classes, dtype=np.float64) * lower_value
@@ -158,8 +127,61 @@ def teste_acertividade(X: list, y: list, rede: MLPClassifier, print_result=False
 
     return result
 
+def prepare_dataset():
+    n_class = 10
+
+    # Base de dados de treinamento
+    print(f'Loading dataset')
+    dataset = pd.read_csv('mnist_train_small.csv')
+    n_inst = len(dataset.index)  # 500
+
+    # Filtrando apenas números específicos
+    # dataset = dataset.loc[dataset['7'] == 1]
+    # dataset = dataset[dataset['6'].isin([1,4])]
+    print(f'Adapting dataset')
+    dataset = dataset.iloc[0:n_inst]
+    dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
+    # dataset.iloc[:, 1:] = dataset.iloc[:, 1:] * 2. - 1.
 
 
+
+    X = dataset.iloc[:, 1:].to_numpy()
+
+    # print(np.shape(X))
+
+    y = [[0] * n_class] * n_inst
+
+    for i in range(0, n_inst):
+        y[i] = list(mlk.
+        output_layer_activation(
+            output_value=dataset.iloc[i, 0],
+            num_classes=n_class,
+            activation_lower_value=0.))
+    return X,y, n_inst
+
+def prepare_test_dataset():
+    n_class = 10
+
+    print(f'Loading and adapting test dataset')
+    test_dataset = pd.read_csv('mnist_test.csv')
+    n_inst = len(test_dataset.index)  # 500
+    test_dataset = test_dataset.iloc[0:n_inst]
+    test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
+    # test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] * 2. - 1.
+
+    X = test_dataset.iloc[:, 1:].to_numpy()
+
+    # print(np.shape(X))
+
+    y = [[0] * n_class] * n_inst
+
+    for i in range(0, n_inst):
+        y[i] = list(mlk.
+        output_layer_activation(
+            output_value=test_dataset.iloc[i, 0],
+            num_classes=n_class,
+            activation_lower_value=0.))
+    return X,y, n_inst
 
 
 

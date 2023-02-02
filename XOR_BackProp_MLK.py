@@ -2,8 +2,62 @@ import MachineLearningKit as mlk
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import datetime
+import MachineLearningCommonFunctions as mlkCF
 
 def main():
+    mlkCF.print_event_time('Start time')
+    X, y, n_inst = prepare_dataset()
+
+    # clf = create_new_classifier()
+    clf = load_classifier('XOR_nn_obj.nn')
+
+    Eav, ne = clf.fit(X,y)
+
+    test_accuracy(X, y, clf)
+
+    print_results(X, y, clf, ne, n_inst, Eav)
+    clf.save_nn_obj('XOR_nn_obj.nn')
+
+def print_results(X, y, clf, ne, n_inst, Eav):
+    print(f'Épocas necessárias: {ne}')
+    plt.plot(Eav[0:(ne)])
+    plt.show()
+    plt_retas(clf, X, y)
+    print(f'Acertividade:{clf.get_acertividade()}%')
+    # print(a.get_output_class())
+    # a.save_neural_network('teste.xlsx')
+def test_accuracy(X_t, y_t, clf):
+    print(f'Testando acertividade:')
+    mlk.teste_acertividade(X_t, y_t, clf,
+                           print_result=False,
+                           save_result=True,
+                           filename='XOR_results.xlsx')
+
+def create_new_classifier():
+    clf = mlk.MLPClassifier(
+        hidden_layer_sizes=((2)),
+        activation=mlk.activation_function_name.TANH,
+        learning_rate='invscaling',  # 'constant'
+        solver=mlk.solver.BACKPROPAGATION,
+        learning_rate_init=0.5,  # 0.001 para constant
+        max_iter=300,
+        shuffle=True,
+        random_state=1,
+        momentum=0.9,  # 0.01 para constant
+        n_individuals=10,
+        weight_limit=1,
+        batch_size='auto',
+        tol=0.00001,
+        n_iter_no_change=10
+    )
+    return clf
+
+def load_classifier(filename):
+    clf = mlk.load_nn_obj(filename)
+    clf.flag_test_acertividade = False
+    return clf
+def prepare_dataset():
     high_lim = 1.
     low_lim = 0.
     data = {'y1': [high_lim, low_lim, low_lim, high_lim],
@@ -15,41 +69,9 @@ def main():
 
     X = dataset.loc[:, ['x1', 'x2']].to_numpy()
     y = dataset.loc[:, ['y1', 'y2']].to_numpy()
-
     dataset.drop(columns=['y1'], inplace=True)
     print(dataset)
-
-    clf=mlk.MLPClassifier(
-        hidden_layer_sizes=((2)),
-        activation= mlk.activation_function_name.TANH,
-        learning_rate = 'invscaling', # 'constant'
-        solver = mlk.solver.BACKPROPAGATION,
-        learning_rate_init = 0.5, # 0.001 para constant
-        max_iter=30000,
-        shuffle=True,
-        random_state=1,
-        momentum=0.9, # 0.01 para constant
-        n_individuals = 10,
-        weight_limit=1,
-        batch_size='auto',
-        tol=0.00001,
-        n_iter_no_change=10
-    )
-
-    Eav, ne = clf.fit(X,y)
-    print(f'Testando acertividade:')
-    mlk.teste_acertividade(X, y, clf,
-                           print_result=False,
-                           save_result=True,
-                           filename='XOR_results.xlsx')
-    print(f'Épocas necessárias: {ne}')
-    plt.plot(Eav[0:(ne)])
-    plt.show()
-    plt_retas(clf, X, y)
-    print(f'Acertividade:{clf.get_acertividade()}%')
-    # print(a.get_output_class())
-    # a.save_neural_network('teste.xlsx')
-
+    return X,y,n_inst
 def plt_retas(rede,X, y):
     # Realiza construção do gráfico 2D das entradas e as retas
     num_inst = np.shape(X)[0]
