@@ -55,7 +55,7 @@ def create_new_classifier():
 
 def load_classifier(filename):
     clf = mlk.load_nn_obj(filename)
-    clf.flag_test_acertividade = False
+    clf.flag_teste_acertividade = False
     return clf
 def prepare_dataset():
     high_lim = 1.

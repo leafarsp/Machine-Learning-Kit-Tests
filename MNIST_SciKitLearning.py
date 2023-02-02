@@ -13,23 +13,28 @@ def main():
 
     X, y, n_inst = prepare_dataset()
 
-    clf = create_new_classifier()
+    # clf = create_new_classifier()
+    clf = load_nn_obj('MNIST_BackProp_Scikit.nn')
+    clf.learning_rate_init=0.1
+    clf.momentum=0.01
+    clf.max_iter=50000
 
     clf.fit(X, y)
 
     X_t, y_t, n_inst_t = prepare_test_dataset()
     clf_mlk = mlk.load_scikit_model(clf)
-    test_accuracy(X_t, y_t, clf)
+    test_accuracy(X_t, y_t, clf_mlk)
 
     clf_mlk.save_neural_network(f'MNIST Scikit learn '
                                 f'model converted.xlsx')
     save_nn_obj(clf, 'MNIST_BackProp_Scikit.nn')
+    save_nn_obj(clf_mlk, 'MNIST_BackProp_Scikit_converted.nn')
 
     print_event_time('End time')
 def test_accuracy(X_t, y_t, clf):
     print(f'Testando acertividade:')
 
-    acert = mlk.teste_acertividade(X_t, y_t, clf_mlk,
+    acert = mlk.teste_acertividade(X_t, y_t, clf,
                                    save_result=True,
                                    filename=f'MNIST '
                                             f'scikitlearn '
@@ -42,7 +47,7 @@ def create_new_classifier():
         learning_rate='invscaling',  # 'adaptive' ,#'invscaling',  # 'constant'
         solver='sgd',
         learning_rate_init=0.5,  # 0.001 para constant
-        max_iter=200000,
+        max_iter=2000,
         shuffle=True,
         random_state=1,
         momentum=0.5,  # 0.01 para constant
@@ -65,6 +70,7 @@ def save_nn_obj(obj, filename):
 def load_nn_obj(filename):
     with open(filename, 'rb') as inp:
         clf = pickle.load(inp)
+    clf.warm_start = True
     return clf
 def output_layer_activation(output_value, num_classes,
                             lower_value=-1.):

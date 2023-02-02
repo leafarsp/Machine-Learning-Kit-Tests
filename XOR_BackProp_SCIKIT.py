@@ -13,7 +13,7 @@ def main():
     # clf = create_new_classifier()
 
     clf = load_nn_obj('clf_scikit_XOR.nn')
-    clf.warm_start=True
+
 
     clf.fit(X,y)
 
@@ -39,6 +39,8 @@ def save_nn_obj(obj, filename):
 def load_nn_obj(filename):
     with open(filename, 'rb') as inp:
         clf = pickle.load(inp)
+
+    clf.warm_start = True
     return clf
 def test_accuracy(X_t, y_t, clf):
     print(f'Testando acertividade:')
