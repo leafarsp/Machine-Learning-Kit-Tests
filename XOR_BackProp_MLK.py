@@ -9,15 +9,22 @@ def main():
     mlkCF.print_event_time('Start time')
     X, y, n_inst = prepare_dataset()
 
-    # clf = create_new_classifier()
-    clf = load_classifier('XOR_nn_obj.nn')
+    clf = create_new_classifier()
+    # clf = load_classifier('XOR_nn_obj.nn')
 
     Eav, ne = clf.fit(X,y)
 
+
+
+
+
     test_accuracy(X, y, clf)
+
+
 
     print_results(X, y, clf, ne, n_inst, Eav)
     clf.save_nn_obj('XOR_nn_obj.nn')
+
 
 def print_results(X, y, clf, ne, n_inst, Eav):
     print(f'Épocas necessárias: {ne}')
@@ -30,16 +37,16 @@ def print_results(X, y, clf, ne, n_inst, Eav):
 def test_accuracy(X_t, y_t, clf):
     print(f'Testando acertividade:')
     mlk.teste_acertividade(X_t, y_t, clf,
-                           print_result=False,
+                           print_result=True,
                            save_result=True,
                            filename='XOR_results.xlsx')
 
 def create_new_classifier():
     clf = mlk.MLPClassifier(
         hidden_layer_sizes=((2)),
-        activation=mlk.activation_function_name.TANH,
+        activation=mlk.ActivationFunctionName.TANH,
         learning_rate='invscaling',  # 'constant'
-        solver=mlk.solver.BACKPROPAGATION,
+        solver=mlk.Solver.BACKPROPAGATION,
         learning_rate_init=0.5,  # 0.001 para constant
         max_iter=300,
         shuffle=True,
@@ -91,6 +98,16 @@ def plt_retas(rede,X, y):
         plt.plot(x_space, cy1)
 
     plt.show()
+
+def test_convert_models(clf):
+    clf.save_neural_network(f'XOR_before_scikit_converted.xlsx')
+
+    clf_scikit = clf.convert_model_to_SciKitLearning()
+    clf_scikit.warm_start = True
+    mlk.load_scikit_model(clf_scikit).save_neural_network(f'XOR_scikit_converted.xlsx')
+    clf_scikit.fit(X, y)
+
+    mlkCF.teste_acertividade_Scikit(X, y, clf_scikit, True)
 
 if __name__ == '__main__':
     main()

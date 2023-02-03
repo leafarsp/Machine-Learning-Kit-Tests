@@ -22,7 +22,7 @@ def main():
 
     print_results(clf, ne, n_inst, Eav)
 
-    clf.save_nn_obj('MNIST_BackProp_Mlk.nn')
+    save_classifier(clf)
 
     mlkCF.print_event_time('End time')
 
@@ -43,9 +43,9 @@ def test_accuracy(X_t, y_t, clf):
 def create_new_classifier():
     clf = mlk.MLPClassifier(
         hidden_layer_sizes=((15)),
-        activation=mlk.activation_function_name.TANH,
+        activation=mlk.ActivationFunctionName.TANH,
         learning_rate='constant',  # 'constant' invscaling
-        solver=mlk.solver.BACKPROPAGATION,
+        solver=mlk.Solver.BACKPROPAGATION,
         learning_rate_init=1e-1,  # 0.001 para constant
 
         max_iter=1,
@@ -64,16 +64,25 @@ def create_new_classifier():
 def load_existing_classifier():
     # clf = mlk.load_neural_network(
     #     f'MNIST_BackProp last.xlsx')
-    clf = mlk.load_nn_obj('MNIST_BackProp_Mlk.nn')
+    clf = mlk.load_nn_obj('MNIST_BackProp_Mlk 2023-02-03 16-28-38.nn')
     clf.flag_teste_acertividade=False
-    clf.max_iter = 1000
+    clf.max_iter = 100
     clf.tol = 1e-6
     clf.n_iter_no_change = 3
-    clf.learning_rate_init = 2e-1
+    clf.learning_rate_init = 1e-1
     clf.momentum = 1e-1
     clf.learning_rate = 'invscaling'  # 'invscaling' constant
-
     return clf
+
+def save_classifier(clf:mlk.MLPClassifier):
+    t = datetime.datetime.now()
+    filename = f'MNIST_BackProp_Mlk ' \
+               f'{t.year:02d}-{t.month:02d}-{t.day:02d} ' \
+               f'{t.hour:02d}-{t.minute:02d}-{t.second:02d}'
+    clf.save_nn_obj(f'MNIST_BackProp_Mlk_last.nn')
+    clf.save_nn_obj(f'{filename}.nn')
+    clf.save_neural_network(f'{filename}.xlsx')
+
 def prepare_dataset():
     n_class = 10
 
