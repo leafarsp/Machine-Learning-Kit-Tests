@@ -13,6 +13,11 @@ def main():
 
     clf = load_existing_classifier()
 
+
+
+
+
+    clf.power_t = 0.15 # 0.1 feito a partir de t=1100
     # clf = create_new_classifier()
 
     Eav, ne = clf.fit(X, y)
@@ -42,36 +47,40 @@ def test_accuracy(X_t, y_t, clf):
 
 def create_new_classifier():
     clf = mlk.MLPClassifier(
-        hidden_layer_sizes=((15)),
-        activation=mlk.ActivationFunctionName.TANH,
-        learning_rate='constant',  # 'constant' invscaling
-        solver=mlk.Solver.BACKPROPAGATION,
-        learning_rate_init=1e-1,  # 0.001 para constant
+        hidden_layer_sizes=((32)),
+        activation=mlk.activation_function_name.TANH,
+        learning_rate='invscaling',  # 'constant' invscaling
+        solver=mlk.solver.BACKPROPAGATION,
+        learning_rate_init=9e-1,  # 0.001 para constant
 
-        max_iter=1,
+        max_iter=10000,
         n_iter_no_change=3,
         shuffle=True,
         random_state=1,
-        momentum=1e-1,  # 0.01 para constant
+        momentum=9e-1,  # 0.01 para constant
         n_individuals=10,
         weight_limit=1.,
         batch_size='auto',
         tol=1e-6,
-        activation_lower_value=-1.
+        activation_lower_value=0.
     )
+    clf.max_epoch_sprint = 200
     return clf
 
 def load_existing_classifier():
     # clf = mlk.load_neural_network(
     #     f'MNIST_BackProp last.xlsx')
-    clf = mlk.load_nn_obj('MNIST_BackProp_Mlk 2023-02-03 16-28-38.nn')
+    clf = mlk.load_nn_obj('MNIST_BackProp_Mlk_last.nn')
     clf.flag_teste_acertividade=False
-    clf.max_iter = 100
-    clf.tol = 1e-6
-    clf.n_iter_no_change = 3
-    clf.learning_rate_init = 1e-1
-    clf.momentum = 1e-1
-    clf.learning_rate = 'invscaling'  # 'invscaling' constant
+    clf.max_epoch_sprint = clf.t + 400
+
+
+    # clf.max_iter = 100
+    # clf.tol = 1e-6
+    # clf.n_iter_no_change = 3
+    # clf.learning_rate_init = 1e-1
+    # clf.momentum = 1e-1
+    # clf.learning_rate = 'invscaling'  # 'invscaling' constant
     return clf
 
 def save_classifier(clf:mlk.MLPClassifier):
@@ -96,7 +105,8 @@ def prepare_dataset():
     # dataset = dataset[dataset['6'].isin([1,4])]
     print(f'Adapting dataset')
     dataset = dataset.iloc[0:n_inst]
-    dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
+    # dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
+    dataset[dataset.columns[1:]] = dataset.iloc[:, 1:] / 255
     # dataset.iloc[:, 1:] = dataset.iloc[:, 1:] * 2. - 1.
 
     X = dataset.iloc[:, 1:].to_numpy()
@@ -131,7 +141,8 @@ def prepare_test_dataset():
     test_dataset = pd.read_csv('mnist_test.csv')
     n_inst = len(test_dataset.index)  # 500
     test_dataset = test_dataset.iloc[0:n_inst]
-    test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
+    # test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
+    test_dataset[test_dataset.columns[1:]] = test_dataset.iloc[:, 1:] / 255
     # test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] * 2. - 1.
 
     X = test_dataset.iloc[:, 1:].to_numpy()

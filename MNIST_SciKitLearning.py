@@ -10,10 +10,7 @@ def main():
     X, y, n_inst = prepare_dataset()
 
     # clf = create_new_classifier()
-    clf = mlkCF.load_nn_obj('MNIST_BackProp_SKL 2023-02-03 15-03-39.nn')
-    clf.learning_rate_init=0.05
-    clf.momentum=0.001
-    clf.max_iter=5000
+    clf = load_existing_classifier()
 
 
     clf.fit(X, y)
@@ -39,24 +36,31 @@ def test_accuracy(X_t, y_t, clf):
                                             f'scikitlearn '
                                             f'results.xlsx')
     print(f'Acertividade: {acert}%')
-
+def load_existing_classifier():
+    clf = mlkCF.load_nn_obj('MNIST_BackProp_SKL_last.nn')
+    clf.warm_start = True
+    # clf.learning_rate_init = 0.05
+    # clf.momentum = 0.01
+    clf.max_iter = 1000
+    # clf.learning_rate = 'adaptive'
+    return clf
 def create_new_classifier():
     clf = MLPClassifier(
-        hidden_layer_sizes=((15,)),
+        hidden_layer_sizes=((32,16)),
         activation='tanh',
-        learning_rate='invscaling',  # 'adaptive' ,#'invscaling',  # 'constant'
+        learning_rate='adaptive',  # 'adaptive' ,#'invscaling',  # 'constant'
         solver='sgd',
-        learning_rate_init=0.5,  # 0.001 para constant
-        max_iter=6000,
+        learning_rate_init=0.9,  # 0.001 para constant
+        max_iter=40000,
         shuffle=True,
         random_state=1,
-        momentum=0.5,  # 0.01 para constant
+        momentum=0.1,  # 0.01 para constant
 
         batch_size='auto',
         tol=1e-8,
         verbose=True,
         n_iter_no_change=10,
-        alpha=1e-5,
+        alpha=1e-9,
     )
     return clf
 
@@ -73,7 +77,9 @@ def prepare_dataset():
     # dataset = dataset[dataset['6'].isin([1,4])]
     print(f'Adapting dataset')
     dataset = dataset.iloc[0:n_inst]
-    dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
+    # dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
+    dataset[dataset.columns[1:]]=dataset.iloc[:, 1:] / 255
+
     # dataset.iloc[:, 1:] = dataset.iloc[:, 1:] * 2. - 1.
 
 
@@ -92,14 +98,17 @@ def prepare_dataset():
             activation_lower_value=0.))
     return X,y, n_inst
 
+
 def prepare_test_dataset():
     n_class = 10
+
 
     print(f'Loading and adapting test dataset')
     test_dataset = pd.read_csv('mnist_test.csv')
     n_inst = len(test_dataset.index)  # 500
     test_dataset = test_dataset.iloc[0:n_inst]
-    test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
+    test_dataset[test_dataset.columns[1:]] = test_dataset.iloc[:, 1:] / 255
+    # test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] / 255
     # test_dataset.iloc[:, 1:] = test_dataset.iloc[:, 1:] * 2. - 1.
 
     X = test_dataset.iloc[:, 1:].to_numpy()
