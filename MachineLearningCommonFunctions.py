@@ -3,7 +3,13 @@ import numpy as np
 import sklearn.neural_network as skl
 import pickle
 import pandas as pd
+from pathlib import Path
 
+
+def get_project_root() -> Path:
+    return Path(__file__).parent.parent
+
+project_path = f'{get_project_root()}\\Machine-Learning-Kit-Tests'
 
 
 
@@ -64,7 +70,7 @@ def teste_acertividade(X: list, y: list, rede: skl,
     list_row = ['', '', 'Accuracy', f'{result:.2f}%']
     list_row += [''] * len(y[0])
     df.loc[len(df)] = list_row
-    df.to_excel(filename, sheet_name='Results')
+    df.to_excel(f'{project_path}\\Testes\\{filename}', sheet_name='Results')
 
     return result
 
@@ -90,8 +96,8 @@ def output_layer_activation(output_value, num_classes,
     return d
 def save_classifier_scikit(clf:skl.MLPClassifier):
     t = datetime.datetime.now()
-    filename = f'MNIST_BackProp_SKL ' \
+    filename = f'{project_path}\\Testes\\MNIST_BackProp_SKL ' \
                f'{t.year:02d}-{t.month:02d}-{t.day:02d} ' \
                f'{t.hour:02d}-{t.minute:02d}-{t.second:02d}'
-    save_nn_obj(clf, f'{filename}.nn')
-    save_nn_obj(clf, f'MNIST_BackProp_SKL_last.nn')
+    save_nn_obj(clf, f'{project_path}\\Testes\\{filename}.nn')
+    save_nn_obj(clf, f'{project_path}\\Testes\\MNIST_BackProp_SKL_last.nn')
