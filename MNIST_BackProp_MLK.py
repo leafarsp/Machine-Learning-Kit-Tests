@@ -14,13 +14,13 @@ def main():
     X, y, n_inst = prepare_dataset()
 
     clf = load_existing_classifier()
+    clf.power_t = 0.2
 
 
 
 
 
-    # clf.power_t = 0.15 # 0.1 feito a partir de t=1100
-    clf = create_new_classifier()
+    # clf = create_new_classifier()
 
     Eav, ne = clf.fit(X, y)
 
@@ -51,7 +51,7 @@ def create_new_classifier():
     clf = mlk.MLPClassifier(
         hidden_layer_sizes=((32,16)),
         activation=mlk.activation_function_name.TANH,
-        learning_rate='adaptive',  # 'constant' invscaling #adaptive
+        learning_rate='invscaling',  # 'constant' invscaling #adaptive
         solver=mlk.solver.BACKPROPAGATION,
         learning_rate_init=9e-1,  # 0.001 para constant
 
@@ -66,8 +66,9 @@ def create_new_classifier():
         tol=1e-4,
         activation_lower_value=0.
     )
-    clf.max_epoch_sprint = 2000
+    clf.max_epoch_sprint = 100
     clf.learning_rate_div=1.5
+    clf.power_t = 0.3
     return clf
 
 def load_existing_classifier():
@@ -75,7 +76,7 @@ def load_existing_classifier():
     #     f'MNIST_BackProp last.xlsx')
     clf = mlk.load_nn_obj(f'{project_path}\\Testes\\MNIST_BackProp_Mlk_last.nn')
     clf.flag_teste_acertividade=False
-    clf.max_epoch_sprint = clf.t + 2000
+    clf.max_epoch_sprint = clf.t + 100
     clf.batch_size=1
 
 
@@ -108,7 +109,7 @@ def prepare_dataset():
     # dataset = dataset.loc[dataset['3'] == 1]
     # dataset = dataset[dataset['6'].isin([1,4])]
 
-    n_inst = 100#len(dataset.index)
+    n_inst = len(dataset.index)
     print(f'Adapting dataset')
     dataset = dataset.iloc[0:n_inst]
     # dataset.iloc[:, 1:] = dataset.iloc[:, 1:] / 255
