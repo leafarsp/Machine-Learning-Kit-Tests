@@ -14,7 +14,7 @@ def main():
     X, y, n_inst = prepare_dataset()
 
     clf = load_existing_classifier()
-    clf.power_t = 0.2
+    old_accuracy = clf.get_acertividade()
 
 
 
@@ -28,7 +28,7 @@ def main():
     test_accuracy(X_t, y_t, clf)
 
     print_results(clf, ne, n_inst, Eav)
-
+    print(f'Acertividade antes do início do treinamento: {old_accuracy:.2f}%')
     save_classifier(clf)
 
     mlkCF.print_event_time('End time')
@@ -49,7 +49,7 @@ def test_accuracy(X_t, y_t, clf):
 
 def create_new_classifier():
     clf = mlk.MLPClassifier(
-        hidden_layer_sizes=((32,16)),
+        hidden_layer_sizes=((64,32)),
         activation=mlk.activation_function_name.TANH,
         learning_rate='invscaling',  # 'constant' invscaling #adaptive
         solver=mlk.solver.BACKPROPAGATION,
@@ -74,10 +74,16 @@ def create_new_classifier():
 def load_existing_classifier():
     # clf = mlk.load_neural_network(
     #     f'MNIST_BackProp last.xlsx')
-    clf = mlk.load_nn_obj(f'{project_path}\\Testes\\MNIST_BackProp_Mlk_last.nn')
+    # clf = mlk.load_nn_obj(f'{project_path}\\Testes\\MNIST_BackProp_Mlk 2023-02-15 10-15-41.nn')
+    clf = mlk.load_nn_obj(f'{project_path}\\MNIST_BackProp_Mlk_last.nn')
     clf.flag_teste_acertividade=False
-    clf.max_epoch_sprint = clf.t + 100
+    clf.max_epoch_sprint = clf.t + 30
     clf.batch_size=1
+    clf.power_t = 0.15
+    clf.tol = 1e-6
+    clf.momentum = 0.01
+
+    # clf.momentum /= 3
 
 
     # clf.max_iter = 100
@@ -93,7 +99,8 @@ def save_classifier(clf:mlk.MLPClassifier):
     filename = f'{project_path}\\Testes\\MNIST_BackProp_Mlk ' \
                f'{t.year:02d}-{t.month:02d}-{t.day:02d} ' \
                f'{t.hour:02d}-{t.minute:02d}-{t.second:02d}'
-    clf.save_nn_obj(f'{project_path}\\Testes\\MNIST_BackProp_Mlk_last.nn')
+    # clf.save_nn_obj(f'{project_path}\\Testes\\MNIST_BackProp_Mlk_last.nn')
+    clf.save_nn_obj(f'{project_path}\\MNIST_BackProp_Mlk_last.nn')
     clf.save_nn_obj(f'{filename}.nn')
     clf.save_neural_network(f'{filename}.xlsx')
 
