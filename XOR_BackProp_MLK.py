@@ -9,15 +9,15 @@ def main():
     mlkCF.print_event_time('Start time')
     X, y, n_inst = prepare_dataset()
 
-    # clf = create_new_classifier()
-    clf = load_classifier('XOR_nn_obj.nn')
-    clf.max_epoch_sprint = clf.t + 200
+    clf = create_new_classifier()
+    # clf = load_classifier('XOR_nn_obj.nn')
+    # clf.max_epoch_sprint = clf.t + 200
 
     Eav, ne = clf.fit(X,y)
-    test_accuracy(X, y, clf)
-    clf.max_epoch_sprint = clf.t + 200
+    # test_accuracy(X, y, clf)
+    # clf.max_epoch_sprint = clf.t + 200
 
-    Eav, ne = clf.fit(X, y)
+    # Eav, ne = clf.fit(X, y)
     test_accuracy(X, y, clf)
 
 
@@ -50,19 +50,19 @@ def create_new_classifier():
         learning_rate='invscaling',  # 'constant'
         solver=mlk.solver.BACKPROPAGATION,
         learning_rate_init=0.5,  # 0.001 para constant
-        max_iter=3000,
+        max_iter=10000,
         shuffle=True,
         random_state=1,
-        momentum=0.9,  # 0.01 para constant
+        momentum=0.1,  # 0.01 para constant
         n_individuals=10,
         weight_limit=1,
         batch_size='auto',
-        tol=0.00001,
+        tol=1e-6,
         n_iter_no_change=10,
 
 
     )
-    clf.max_epoch_sprint=100
+    # clf.max_epoch_sprint=3000
     return clf
 
 def load_classifier(filename):
