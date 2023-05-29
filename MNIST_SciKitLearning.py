@@ -9,8 +9,8 @@ def main():
 
     X, y, n_inst = prepare_dataset()
 
-    # clf = create_new_classifier()
-    clf = load_existing_classifier()
+    clf = create_new_classifier()
+    #clf = load_existing_classifier()
 
 
     clf.fit(X, y)
@@ -46,15 +46,15 @@ def load_existing_classifier():
     return clf
 def create_new_classifier():
     clf = MLPClassifier(
-        hidden_layer_sizes=((32,16)),
+        hidden_layer_sizes=((64,32,16)),
         activation='tanh',
         learning_rate='adaptive',  # 'adaptive' ,#'invscaling',  # 'constant'
         solver='sgd',
-        learning_rate_init=0.9,  # 0.001 para constant
-        max_iter=40000,
+        learning_rate_init=1.5,  # 0.001 para constant
+        max_iter=80000,
         shuffle=True,
         random_state=1,
-        momentum=0.1,  # 0.01 para constant
+        momentum=0.5,  # 0.01 para constant
 
         batch_size='auto',
         tol=1e-8,
