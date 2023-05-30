@@ -1,14 +1,12 @@
 import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from mpl_interactions import ioff, panhandler, zoom_factory
 from functools import partial
 import numpy as np
 
-
-
-
 class DefineColor:
-    def __init__(self,color):
+    def __init__(self, color):
         self.color = color
 
     def get_color(self):
@@ -17,31 +15,13 @@ class DefineColor:
     def set_color(self, color):
         self.color = color
 
-
-
-
 def on_bt_red(current_color: DefineColor):
     current_color.color = 0
-
 
 def on_bt_blue(current_color: DefineColor):
     current_color.color = 1
 
-def zoom(event):
-    ax = plt.gca()
-    if event.button == 'up':
-        ax.set_xlim(ax.get_xlim()[0] * 0.9, ax.get_xlim()[1] * 0.9)
-        ax.set_ylim(ax.get_ylim()[0] * 0.9, ax.get_ylim()[1] * 0.9)
-    elif event.button == 'down':
-        ax.set_xlim(ax.get_xlim()[0] * 1.1, ax.get_xlim()[1] * 1.1)
-        ax.set_ylim(ax.get_ylim()[0] * 1.1, ax.get_ylim()[1] * 1.1)
-    fig.canvas.draw()
-
-
-
-def on_get_points(red_points,blue_points):
-    # print("Red points:", red_points)
-    # print("Blue points:", blue_points)
+def on_get_points(red_points, blue_points):
     r_ar = np.array(red_points)
     b_ar = np.array(blue_points)
     x = np.r_[r_ar, b_ar]
@@ -51,16 +31,11 @@ def on_get_points(red_points,blue_points):
     print(f'x: {x}')
     print(f'y: {y}')
 
-
-
-
-
 def main():
     red_points = []
     blue_points = []
     red_color_activated = []
     blue_color_activated = []
-
     current_color = DefineColor(0)
 
     def on_click(event):
@@ -74,21 +49,6 @@ def main():
                 plt.plot(event.xdata, event.ydata, 'bo')
                 fig.canvas.draw_idle()
 
-    def zoom_in():
-        # ax = plt.gca()
-        pass
-        # ax.set_xlim(ax.get_xlim()[0] * 0.9, ax.get_xlim()[1] * 0.9)
-        # ax.set_ylim(ax.get_ylim()[0] * 0.9, ax.get_ylim()[1] * 0.9)
-        # fig.canvas.draw()
-
-    def zoom_out():
-        pass
-        # ax = plt.gca()
-        #
-        # ax.set_xlim(ax.get_xlim()[0] * 1.1, ax.get_xlim()[1] * 1.1)
-        # ax.set_ylim(ax.get_ylim()[0] * 1.1, ax.get_ylim()[1] * 1.1)
-        # fig.canvas.draw()
-
     root = tk.Tk()
     root.title("Point Drawer")
 
@@ -97,20 +57,14 @@ def main():
     button_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
     # Create buttons in the button frame
-    button1 = tk.Button(button_frame, text="Button 1", command=partial(on_bt_red,current_color))
+    button1 = tk.Button(button_frame, text="Button 1", command=partial(on_bt_red, current_color))
     button1.pack(side=tk.BOTTOM, pady=10)
 
-    button2 = tk.Button(button_frame, text="Button 2", command=partial(on_bt_blue,current_color))
+    button2 = tk.Button(button_frame, text="Button 2", command=partial(on_bt_blue, current_color))
     button2.pack(side=tk.BOTTOM, pady=10)
 
-    button3 = tk.Button(button_frame, text="Button 3", command=partial(on_get_points,red_points,blue_points))
+    button3 = tk.Button(button_frame, text="Button 3", command=partial(on_get_points, red_points, blue_points))
     button3.pack(side=tk.BOTTOM, pady=10)
-
-    button_zoom_in = tk.Button(button_frame, text="Zoom In", command=zoom_in)
-    button_zoom_in.pack(side=tk.BOTTOM, pady=10)
-
-    button_zoom_out = tk.Button(button_frame, text="Zoom Out", command=zoom_out)
-    button_zoom_out.pack(side=tk.BOTTOM, pady=10)
 
     # Create a frame for the plot window
     plot_frame = tk.Frame(root)
@@ -123,12 +77,13 @@ def main():
     canvas.draw()
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    # Enable zooming with the scroll wheel
+    zoom_factory(plt, base_scale=1.1)
+
     # Bind the click event to the plot canvas
     canvas.mpl_connect('button_press_event', on_click)
 
     root.mainloop()
-
-
 
 if __name__ == '__main__':
     main()
