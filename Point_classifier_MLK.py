@@ -1,89 +1,126 @@
-import tkinter as tk
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from mpl_interactions import ioff, panhandler, zoom_factory
-from functools import partial
+import MachineLearningKit as mlk
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import datetime
+import MachineLearningCommonFunctions as mlkCF
 
-class DefineColor:
-    def __init__(self, color):
-        self.color = color
+project_path = f'{mlkCF.get_project_root()}\\Machine-Learning-Kit-Tests'
+project_name = f'MNIST_BackProp_Mlk_last_32_16.nn'
 
-    def get_color(self):
-        return self.color
 
-    def set_color(self, color):
-        self.color = color
+def train_neural_network(X: list, y: list, X_test, y_test):
+    old_accuracy = 0
+    mlkCF.print_event_time('Start time')
 
-def on_bt_red(current_color: DefineColor):
-    current_color.color = 0
+    # clf = load_existing_classifier()
+    # old_accuracy = clf.get_acertividade()
+    # #
+    # # clf.learning_rate_init *= 0.5
+    # eta, alpha = mlk.get_momentum_andLearning_rate(clf.t,clf.t+100, clf)
+    # print(f'Learning rate: {eta}, momentum: {alpha}')
+    # print(clf.t)
+    # # exit()
+    clf = create_new_classifier()
+    # X, y, n_inst = prepare_dataset()
+    n_inst = np.shape(X)[0]
+    Eav, ne = clf.fit(X, y)
 
-def on_bt_blue(current_color: DefineColor):
-    current_color.color = 1
+    X_t, y_t, n_inst_t = X, y, n_inst
+    test_accuracy(X_t, y_t, clf)
 
-def on_get_points(red_points, blue_points):
-    r_ar = np.array(red_points)
-    b_ar = np.array(blue_points)
-    x = np.r_[r_ar, b_ar]
-    y_r = np.zeros(np.shape(r_ar)[0])
-    y_b = np.ones(np.shape(b_ar)[0])
-    y = np.r_[y_r, y_b]
-    print(f'x: {x}')
-    print(f'y: {y}')
+    print_results(clf, ne, n_inst, Eav)
+    print(f'Acertividade antes do início do treinamento: {old_accuracy:.2f}%')
+    save_classifier(clf)
 
-def main():
-    red_points = []
-    blue_points = []
-    red_color_activated = []
-    blue_color_activated = []
-    current_color = DefineColor(0)
+    mlkCF.print_event_time('End time')
 
-    def on_click(event):
-        if event.button == 1:
-            if current_color.color == 0:
-                red_points.append((event.xdata, event.ydata))
-                plt.plot(event.xdata, event.ydata, 'ro')
-                fig.canvas.draw_idle()
-            elif current_color.color == 1:
-                blue_points.append((event.xdata, event.ydata))
-                plt.plot(event.xdata, event.ydata, 'bo')
-                fig.canvas.draw_idle()
+    return clf
 
-    root = tk.Tk()
-    root.title("Point Drawer")
+def create_new_classifier():
+    clf = mlk.MLPClassifier(
+        hidden_layer_sizes=((32, 16)),
+        activation=mlk.activation_function_name.TANH,
+        learning_rate='invscaling',  # 'constant' invscaling #adaptive
+        solver=mlk.solver.BACKPROPAGATION,
+        learning_rate_init=5e-2,  # 0.001 para constant
 
-    # Create a frame for the buttons
-    button_frame = tk.Frame(root)
-    button_frame.pack(side=tk.LEFT, padx=10, pady=10)
+        max_iter=3000,
+        n_iter_no_change=3,
+        shuffle=True,
+        random_state=1,
+        momentum=1e-2,  # 0.01 para constant
+        n_individuals=10,
+        weight_limit=1.,
+        batch_size=10,
+        tol=1e-6,
+        activation_lower_value=0.
+    )
+    clf.max_epoch_sprint = 100
+    # clf.learning_rate_div=1.5
+    # clf.power_t = 0.3
+    return clf
 
-    # Create buttons in the button frame
-    button1 = tk.Button(button_frame, text="Button 1", command=partial(on_bt_red, current_color))
-    button1.pack(side=tk.BOTTOM, pady=10)
 
-    button2 = tk.Button(button_frame, text="Button 2", command=partial(on_bt_blue, current_color))
-    button2.pack(side=tk.BOTTOM, pady=10)
+def load_existing_classifier():
+    # clf = mlk.load_neural_network(
+    #     f'MNIST_BackProp last.xlsx')
+    # clf = mlk.load_nn_obj(f'{project_path}\\Testes\\MNIST_BackProp_Mlk 2023-02-15 10-15-41.nn')
+    clf = mlk.load_nn_obj(f'{project_path}\\{project_name}')
+    clf.flag_teste_acertividade = False
+    clf.max_epoch_sprint = clf.t + 200
+    # clf.batch_size=50
+    # clf.power_t = 0.05
+    # # clf.tol = 1e-9
+    # clf.momentum = 0.001
+    # clf.cnt_error_free = 0
+    # clf.learning_rate_changed = False
 
-    button3 = tk.Button(button_frame, text="Button 3", command=partial(on_get_points, red_points, blue_points))
-    button3.pack(side=tk.BOTTOM, pady=10)
+    # clf.momentum /= 3
 
-    # Create a frame for the plot window
-    plot_frame = tk.Frame(root)
-    plot_frame.pack(side=tk.RIGHT, padx=10, pady=10)
+    # clf.max_iter = 100
+    # clf.tol = 1e-6
+    # clf.n_iter_no_change = 3
+    # clf.learning_rate_init = 1e-1
+    # clf.momentum = 1e-1
+    # clf.learning_rate = 'invscaling'  # 'invscaling' constant
+    return clf
 
-    # Create a figure and canvas for the plot window
-    fig = Figure(figsize=(5, 5), dpi=100)
-    plt = fig.add_subplot(111)
-    canvas = FigureCanvasTkAgg(fig, master=plot_frame)
-    canvas.draw()
-    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-    # Enable zooming with the scroll wheel
-    zoom_factory(plt, base_scale=1.1)
+def save_classifier(clf: mlk.MLPClassifier):
+    t = datetime.datetime.now()
+    filename = f'{project_path}\\Testes\\MNIST_BackProp_Mlk ' \
+               f'{t.year:02d}-{t.month:02d}-{t.day:02d} ' \
+               f'{t.hour:02d}-{t.minute:02d}-{t.second:02d}'
+    # clf.save_nn_obj(f'{project_path}\\Testes\\{project_name}')
+    clf.save_nn_obj(f'{project_path}\\{project_name}')
+    clf.save_nn_obj(f'{filename}.nn')
+    clf.save_neural_network(f'{filename}.xlsx')
 
-    # Bind the click event to the plot canvas
-    canvas.mpl_connect('button_press_event', on_click)
 
-    root.mainloop()
+def test_accuracy(X_t, y_t, clf):
+    print(f'Testando acertividade:')
+    t = datetime.datetime.now()
+    filename = f'{project_path}\\Testes\\MNIST_results ' \
+               f'{t.year:02d}-{t.month:02d}-{t.day:02d} ' \
+               f'{t.hour:02d}-{t.minute:02d}-{t.second:02d}.xlsx'
+    clf.flag_teste_acertividade = False
 
-if __name__ == '__main__':
-    main()
+    mlk.teste_acertividade(X_t, y_t, clf, print_result=False,
+                           save_result=True,
+                           filename=filename)
+    print(f'Acertividade:{clf.get_acertividade():.2f}%')
+
+
+def print_results(clf, ne, n_inst, Eav):
+    print(f'Épocas necessárias: {ne}')
+    plt.plot(Eav[0:(ne * n_inst)])
+    plt.show()
+    t = datetime.datetime.now()
+    clf.save_neural_network(f'{project_path}\\Testes\\MNIST_BackProp {t.year}-{t.month}'
+                            f'-{t.day} {t.hour}-{t.minute}'
+                            f'-{t.second}.xlsx')
+    clf.save_neural_network(f'{project_path}\\Testes\\MNIST_BackProp last.xlsx')
+
+
+
