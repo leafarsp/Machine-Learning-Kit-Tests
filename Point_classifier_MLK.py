@@ -9,7 +9,7 @@ project_path = f'{mlkCF.get_project_root()}\\Machine-Learning-Kit-Tests'
 project_name = f'MNIST_BackProp_Mlk_last_32_16.nn'
 
 
-def train_neural_network(X: list, y: list, X_test, y_test):
+def train_neural_network(clf, X: list, y: list ):
     old_accuracy = 0
     mlkCF.print_event_time('Start time')
 
@@ -21,17 +21,13 @@ def train_neural_network(X: list, y: list, X_test, y_test):
     # print(f'Learning rate: {eta}, momentum: {alpha}')
     # print(clf.t)
     # # exit()
-    clf = create_new_classifier()
+
     # X, y, n_inst = prepare_dataset()
     n_inst = np.shape(X)[0]
     Eav, ne = clf.fit(X, y)
 
-    X_t, y_t, n_inst_t = X, y, n_inst
-    test_accuracy(X_t, y_t, clf)
 
-    print_results(clf, ne, n_inst, Eav)
-    print(f'Acertividade antes do início do treinamento: {old_accuracy:.2f}%')
-    save_classifier(clf)
+    # save_classifier(clf)
 
     mlkCF.print_event_time('End time')
 
@@ -39,24 +35,24 @@ def train_neural_network(X: list, y: list, X_test, y_test):
 
 def create_new_classifier():
     clf = mlk.MLPClassifier(
-        hidden_layer_sizes=((32, 16)),
+        hidden_layer_sizes=((16, 8)),
         activation=mlk.activation_function_name.TANH,
         learning_rate='invscaling',  # 'constant' invscaling #adaptive
         solver=mlk.solver.BACKPROPAGATION,
-        learning_rate_init=5e-2,  # 0.001 para constant
+        learning_rate_init=5e-1,  # 0.001 para constant
 
-        max_iter=3000,
+        max_iter=5000,
         n_iter_no_change=3,
         shuffle=True,
         random_state=1,
-        momentum=1e-2,  # 0.01 para constant
+        momentum=1e-1,  # 0.01 para constant
         n_individuals=10,
         weight_limit=1.,
-        batch_size=10,
+        batch_size=1,
         tol=1e-6,
         activation_lower_value=0.
     )
-    clf.max_epoch_sprint = 100
+    clf.max_epoch_sprint = 5000
     # clf.learning_rate_div=1.5
     # clf.power_t = 0.3
     return clf

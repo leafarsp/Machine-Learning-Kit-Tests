@@ -6,6 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_interactions import ioff, panhandler, zoom_factory
 from functools import partial
 import numpy as np
+import Point_classifier_MLK as pcl
 
 class DefineColor:
     def __init__(self, color):
@@ -34,7 +35,7 @@ def on_get_points(red_points, blue_points, plot, fig):
     y_b = np.ones(np.shape(b_ar)[0])
     y = np.r_[y_r, y_b]
 
-    #treinar a rede aqui
+
 
     print(f'x: {X}')
     print(f'X[:,0]: {X[:,0]}')
@@ -47,8 +48,8 @@ def on_get_points(red_points, blue_points, plot, fig):
 
     print(f'lengh_Xx = {lengh_Xx}, lengh_Xy = {lengh_Xy}')
     print(f'center_Xx = {center_Xx}, center_Xy = {center_Xy}')
-    test_points_Xx = 10
-    test_points_Xy = 10
+    test_points_Xx = 30
+    test_points_Xy = 30
 
     x_test_min = center_Xx - lengh_Xx * 1.2
     x_test_max = center_Xx + lengh_Xx * 1.2
@@ -68,6 +69,18 @@ def on_get_points(red_points, blue_points, plot, fig):
     # Generate random z values for demonstration purposes
     z_pts = np.random.random(len(X_pts))
 
+    y_inv = [0]*len(y)
+    for i in range(len(y)):
+        if y[i] == 0:
+            y_inv[i] = 1
+    y_train = np.c_[y,y_inv]
+    # treinar a rede aqui
+    clf = pcl.create_new_classifier()
+    pcl.train_neural_network(clf, X, y_train)
+
+    for i in range(0,len(X_pts)):
+
+        z_pts[i] = clf.predict(X_pts[i])[0]
     # Plot color map
     # plt.tripcolor(X_pts[:, 0], X_pts[:, 1], z_pts, cmap='magma')
 
@@ -78,8 +91,8 @@ def on_get_points(red_points, blue_points, plot, fig):
     plot.clear()
 
      # Plot red and blue points
-    plot.plot(red_points[:, 0], red_points[:, 1], 'ro')
-    plot.plot(blue_points[:, 0], blue_points[:, 1], 'bo')
+    plot.plot(red_points[:, 0], red_points[:, 1])
+    plot.plot(blue_points[:, 0], blue_points[:, 1])
 
     # Create a Rectangle patch
     # Example usage
