@@ -91,16 +91,16 @@ def on_get_points(red_points, blue_points, plot, fig):
     plot.clear()
 
      # Plot red and blue points
-    plot.plot(red_points[:, 0], red_points[:, 1])
-    plot.plot(blue_points[:, 0], blue_points[:, 1])
+    plot.plot(red_points[:, 0], red_points[:, 1], 'ro')
+    plot.plot(blue_points[:, 0], blue_points[:, 1], 'bo')
 
     # Create a Rectangle patch
     # Example usage
     value = 0.5
     min_value = 0.0
     max_value = 1.0
-    min_color = (255, 0, 0)  # Red
-    max_color = (0, 0, 255)  # Blue
+    min_color = (250, 0, 0)  # Red
+    max_color = (0, 0, 250)  # Blue
 
 
     # print(color_code)  # Output: #7f007f

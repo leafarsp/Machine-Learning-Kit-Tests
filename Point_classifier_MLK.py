@@ -41,18 +41,18 @@ def create_new_classifier():
         solver=mlk.solver.BACKPROPAGATION,
         learning_rate_init=5e-1,  # 0.001 para constant
 
-        max_iter=5000,
+        max_iter=50000,
         n_iter_no_change=3,
         shuffle=True,
         random_state=1,
-        momentum=1e-1,  # 0.01 para constant
+        momentum=2e-1,  # 0.01 para constant
         n_individuals=10,
         weight_limit=1.,
         batch_size=1,
-        tol=1e-6,
+        tol=1e-7,
         activation_lower_value=0.
     )
-    clf.max_epoch_sprint = 5000
+    clf.max_epoch_sprint = 50000
     # clf.learning_rate_div=1.5
     # clf.power_t = 0.3
     return clf
