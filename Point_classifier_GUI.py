@@ -76,21 +76,27 @@ def on_get_points(red_points, blue_points, plot, fig):
     y_train = np.c_[y,y_inv]
     # treinar a rede aqui
     clf = pcl.create_new_classifier()
-    pcl.train_neural_network(clf, X, y_train)
+    clf.max_epoch_sprint = 20
+    for _ in range(0,10000):
+        if clf.state == 'training_finished':
+            break
+        pcl.train_neural_network(clf, X, y_train)
+        clf.max_epoch_sprint = clf.t + 10
 
-    for i in range(0,len(X_pts)):
+        for i in range(0,len(X_pts)):
+            z_pts[i] = clf.predict(X_pts[i])[0]
 
-        z_pts[i] = clf.predict(X_pts[i])[0]
-    # Plot color map
-    # plt.tripcolor(X_pts[:, 0], X_pts[:, 1], z_pts, cmap='magma')
+        draw_result(fig, plot, X_pts, z_pts, red_points, blue_points, square_side_x, square_side_y)
 
-    # Plot red and blue points
+
+
+def draw_result(fig, plot, X_pts, z_pts, red_points, blue_points, square_side_x, square_side_y):
     red_points = np.array(red_points)
     blue_points = np.array(blue_points)
     # Clear the existing plot
     plot.clear()
 
-     # Plot red and blue points
+    # Plot red and blue points
     plot.plot(red_points[:, 0], red_points[:, 1], 'ro')
     plot.plot(blue_points[:, 0], blue_points[:, 1], 'bo')
 
@@ -102,24 +108,18 @@ def on_get_points(red_points, blue_points, plot, fig):
     min_color = (240, 0, 0)  # Red
     max_color = (0, 0, 240)  # Blue
 
-
     # print(color_code)  # Output: #7f007f
-    for i in range(0,np.shape(X_pts)[0]):
-        #usar o predict jogando os valores de X_pts
+    for i in range(0, np.shape(X_pts)[0]):
+        # usar o predict jogando os valores de X_pts
         color_code = get_color_code(z_pts[i], min_value, max_value, min_color, max_color)
-        rect = patches.Rectangle(xy=(X_pts[i][0], X_pts[i][1]), width=square_side_x, height=square_side_y, linewidth=0, edgecolor=color_code, facecolor=color_code)
+        rect = patches.Rectangle(xy=(X_pts[i][0], X_pts[i][1]), width=square_side_x, height=square_side_y, linewidth=0,
+                                 edgecolor=color_code, facecolor=color_code)
         # Add the patch to the Axes
         plot.add_patch(rect)
 
-
-
     # Redraw the canvas
     fig.canvas.draw_idle()
-
-    # print(f'x_test = {X_pts}')
-    # plt.imshow(X_pts, aspect='auto', cmap=plt.get_cmap('magma'), origin='lower')
-def draw_result(X_pts, y_pts):
-    pass
+    fig.canvas.flush_events()
 def main():
     red_points = []
     blue_points = []
@@ -139,7 +139,7 @@ def main():
                 fig.canvas.draw_idle()
 
     root = tk.Tk()
-    root.title("Point Drawer")
+    root.title("Point Classifier")
 
     # Create a frame for the buttons
     button_frame = tk.Frame(root)
@@ -149,7 +149,7 @@ def main():
     button1 = tk.Button(button_frame, text="Red", command=partial(on_bt_red, current_color))
     button1.pack(side=tk.BOTTOM, pady=10)
 
-    button2 = tk.Button(button_frame, text="Button 2", command=partial(on_bt_blue, current_color))
+    button2 = tk.Button(button_frame, text="Blue", command=partial(on_bt_blue, current_color))
     button2.pack(side=tk.BOTTOM, pady=10)
 
 
@@ -171,7 +171,7 @@ def main():
     # Bind the click event to the plot canvas
     canvas.mpl_connect('button_press_event', on_click)
 
-    button3 = tk.Button(button_frame, text="Button 3", command=partial(on_get_points, red_points, blue_points, plot, fig))
+    button3 = tk.Button(button_frame, text="Train network", command=partial(on_get_points, red_points, blue_points, plot, fig))
     button3.pack(side=tk.BOTTOM, pady=10)
 
     root.mainloop()
