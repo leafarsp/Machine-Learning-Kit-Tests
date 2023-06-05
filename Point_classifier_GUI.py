@@ -48,20 +48,20 @@ def on_get_points(red_points, blue_points, plot, fig):
 
     print(f'lengh_Xx = {lengh_Xx}, lengh_Xy = {lengh_Xy}')
     print(f'center_Xx = {center_Xx}, center_Xy = {center_Xy}')
-    test_points_Xx = 30
-    test_points_Xy = 30
+    test_points_Xx = 50
+    test_points_Xy = 50
 
-    x_test_min = center_Xx - lengh_Xx * 1.2
-    x_test_max = center_Xx + lengh_Xx * 1.2
+    x_test_min = center_Xx - lengh_Xx * 1.2 / 2.
+    x_test_max = center_Xx + lengh_Xx * 1.2 / 2.
 
-    y_test_min = center_Xy - lengh_Xy * 1.2
-    y_test_max = center_Xy + lengh_Xy * 1.2
+    y_test_min = center_Xy - lengh_Xy * 1.2 / 2.
+    y_test_max = center_Xy + lengh_Xy * 1.2 / 2.
 
-    x_test = list(np.linspace(x_test_min, x_test_max, test_points_Xx))
-    y_test = list(np.linspace(y_test_min, y_test_max, test_points_Xy))
+    x_test = list(np.linspace(x_test_min, x_test_max, test_points_Xx+1))
+    y_test = list(np.linspace(y_test_min, y_test_max, test_points_Xy+1))
     z_test = list(np.linspace(0,1,2))
-    square_side_x = (lengh_Xx * 1.2 * 2.3) / (test_points_Xx)
-    square_side_y = (lengh_Xx * 1.2 * 2.1) / (test_points_Xy)
+    square_side_x = (lengh_Xx * 1.2) / (test_points_Xx)
+    square_side_y = (lengh_Xx * 1.2) / (test_points_Xy)
 
     xv, yv = np.meshgrid(x_test,y_test)
     X_pts = np.stack((np.ravel(xv), np.ravel(yv)),axis=-1)
@@ -99,15 +99,15 @@ def on_get_points(red_points, blue_points, plot, fig):
     value = 0.5
     min_value = 0.0
     max_value = 1.0
-    min_color = (250, 0, 0)  # Red
-    max_color = (0, 0, 250)  # Blue
+    min_color = (240, 0, 0)  # Red
+    max_color = (0, 0, 240)  # Blue
 
 
     # print(color_code)  # Output: #7f007f
     for i in range(0,np.shape(X_pts)[0]):
         #usar o predict jogando os valores de X_pts
         color_code = get_color_code(z_pts[i], min_value, max_value, min_color, max_color)
-        rect = patches.Rectangle((X_pts[i][0], X_pts[i][1]), square_side_x, square_side_y, linewidth=1, edgecolor=None, facecolor=color_code)
+        rect = patches.Rectangle(xy=(X_pts[i][0], X_pts[i][1]), width=square_side_x, height=square_side_y, linewidth=0, edgecolor=color_code, facecolor=color_code)
         # Add the patch to the Axes
         plot.add_patch(rect)
 
@@ -146,7 +146,7 @@ def main():
     button_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
     # Create buttons in the button frame
-    button1 = tk.Button(button_frame, text="Button 1", command=partial(on_bt_red, current_color))
+    button1 = tk.Button(button_frame, text="Red", command=partial(on_bt_red, current_color))
     button1.pack(side=tk.BOTTOM, pady=10)
 
     button2 = tk.Button(button_frame, text="Button 2", command=partial(on_bt_blue, current_color))

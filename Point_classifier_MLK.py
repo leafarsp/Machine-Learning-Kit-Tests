@@ -52,7 +52,7 @@ def create_new_classifier():
         tol=1e-7,
         activation_lower_value=0.
     )
-    clf.max_epoch_sprint = 50000
+    clf.max_epoch_sprint = 300
     # clf.learning_rate_div=1.5
     # clf.power_t = 0.3
     return clf
