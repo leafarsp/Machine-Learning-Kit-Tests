@@ -34,8 +34,8 @@ def on_get_points(red_points, green_points, blue_points, plot, fig):
     X = np.r_[r_ar, g_ar, b_ar]
 
     y_r = [[1., 0., 0.]] * len(r_ar)
-    y_b = [[0., 1., 0.]] * len(g_ar)
-    y_g = [[0., 0., 1.]] * len(b_ar)
+    y_g = [[0., 1., 0.]] * len(g_ar)
+    y_b = [[0., 0., 1.]] * len(b_ar)
     y = np.r_[y_r, y_g, y_b]
 
 
@@ -115,7 +115,8 @@ def draw_result(fig, plot, X_pts, color_pts, red_points, green_points, blue_poin
         # usar o predict jogando os valores de X_pts
         color_code = get_color_code(color_pts[i], min_value, max_value, min_color, max_color)
 
-        rect = patches.Rectangle(xy=(X_pts[i][0], X_pts[i][1]), width=square_side_x, height=square_side_y, linewidth=0,
+        rect = patches.Rectangle(xy=(X_pts[i][0], X_pts[i][1]), width=square_side_x, height=square_side_y,
+                                 linewidth=(square_side_x * 0.1),
                                  edgecolor=color_code, facecolor=color_code)
         # Add the patch to the Axes
         plot.add_patch(rect)
